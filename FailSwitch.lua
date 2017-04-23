@@ -1,7 +1,7 @@
 local failSwitch= {}
 
-failSwitch.optionEnable = Menu.AddOption({ "Utility","Fail Switch"}, "Enable", "Stop ultimate if no enemy in radius")
-failSwitch.optionKey = Menu.AddKeyOption({ "Utility","Fail Switch"}, "Force Cast Key",Enum.ButtonCode.KEY_P)
+failSwitch.optionEnable = Menu.AddOption({ "Utility", "Fail Switch"}, "Enable", "Stop ultimate if no enemy in radius")
+failSwitch.optionKey = Menu.AddKeyOption({ "Utility", "Fail Switch"}, "Force Cast Key", Enum.ButtonCode.KEY_P)
 
 failSwitch.ultiRadius = {enigma_black_hole = 420, magnataur_reverse_polarity = 410, faceless_void_chronosphere = 425}
 failSwitch.castPoint = {enigma_black_hole = 0.3, magnataur_reverse_polarity = 0.3, faceless_void_chronosphere = 0.35}
@@ -70,7 +70,13 @@ function failSwitch.CountEnemyInRange(position, range)
 end
 
 function failSwitch.OnUnitAnimation(animation)
-	if animation.unit==Heroes.GetLocal() then
+	if not Menu.IsEnabled(failSwitch.optionEnable) then 
+		failSwitch.ClearVars()
+		return 
+	end
+	if Menu.IsKeyDown(failSwitch.optionKey) then 
+		failSwitch.ClearVars()
+		return 
 	end
 	if animation.unit==Heroes.GetLocal() and animation.activity==Enum.GameActivity.ACT_DOTA_CAST_ABILITY_4 then
 		if failSwitch.CountEnemyInRange(failSwitch.castPosition, failSwitch.ultiRadius[failSwitch.castAbilityName]) == 0 then
@@ -87,9 +93,7 @@ function failSwitch.CancelAnimation()
 	local myHero = Heroes.GetLocal()
 	local myPlayer = Players.GetLocal()
 	Player.PrepareUnitOrders(myPlayer, Enum.UnitOrder.DOTA_UNIT_ORDER_STOP, nil, Entity.GetAbsOrigin(myHero), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero, false, true)
-	failSwitch.castPosition = Vector(0,0,0)
-	failSwitch.castAbilityName = ""
-	failSwitch.animationEndTime = 0
+	failSwitch.ClearVars()
 end
 
 function failSwitch.CheckOnAnimationEnd()
@@ -98,10 +102,14 @@ function failSwitch.CheckOnAnimationEnd()
 		if failSwitch.CountEnemyInRange(failSwitch.castPosition, failSwitch.ultiRadius[failSwitch.castAbilityName]) == 0 then
 			failSwitch.CancelAnimation()
 		end
-		failSwitch.castPosition = Vector(0,0,0)
-		failSwitch.castAbilityName = ""
-		failSwitch.animationEndTime = 0
+		failSwitch.ClearVars()
 	end
+end
+
+function failSwitch.ClearVars()
+	failSwitch.castPosition = Vector(0,0,0)
+	failSwitch.castAbilityName = ""
+	failSwitch.animationEndTime = 0
 end
 
 return failSwitch
