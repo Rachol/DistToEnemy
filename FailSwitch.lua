@@ -60,7 +60,9 @@ function failSwitch.CountEnemyInRange(position, range)
 	
 	for index, ent in pairs(entities) do
 		local enemyhero = Heroes.Get(index)
-		if not Entity.IsSameTeam(me, enemyhero) and not NPC.IsIllusion(enemyhero) and NPC.IsPositionInRange(enemyhero, position, range, 0) then
+		local enemyspeed = NPC.GetMoveSpeed(enemyhero)
+		-- Account for the distance enemy can walk in 50ms(enemyspeed/20)
+		if not Entity.IsSameTeam(me, enemyhero) and not NPC.IsIllusion(enemyhero) and NPC.IsPositionInRange(enemyhero, position, range - enemyspeed/20, 0) then
 			inRangeCount = inRangeCount + 1
 		end
 	end
